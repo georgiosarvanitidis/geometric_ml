@@ -18,7 +18,7 @@ clear;
 close all;
 
 % load the data
-load /data/example2_data_parametric.mat
+load ../data/example2_data_parametric.mat
 
 % The parameters of the expected metric
 muNet.W0 = W0';

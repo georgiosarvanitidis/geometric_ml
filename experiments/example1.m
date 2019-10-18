@@ -21,7 +21,7 @@ clear;
 close all;
 
 % Generate some random data
-load /data/example1_data_nonparametric.mat;
+load ../data/example1_data_nonparametric.mat;
 N = size(data, 1);
 
 % Here we construct a nonparametric Riemannian metric
