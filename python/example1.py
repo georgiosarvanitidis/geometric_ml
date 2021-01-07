@@ -7,15 +7,19 @@ import matplotlib.pyplot as plt
 '''
 In this example we construct a simple manifold and compute the geodesic curve between two points using several solvers.
 
-:solver_bvp: uses the built-in python bvp5c solver.
-:solver_fp: implements the method in "Fast and Robust Shortest Paths on Data Learned Riemannian Manifolds", G. Arvanitidis, et. al., AISTATS 2019.
+:solver_bvp: uses the python scipy bvp5c solver.
+:solver_fp: implements the method in
+ 
+    "Fast and Robust Shortest Paths on Data Learned Riemannian Manifolds", 
+        G. Arvanitidis, et. al., AISTATS 2019.
+        
 :solver_graph: a heuristic solver based on a graph and a cubic-spline
 :solver_comb: a combination of two solvers, where the solution of the solver_2 is used to initialize solver_1 
 '''
 
 # Construct an artificial data set
-data_parms = {'N': 200, 'data_type': 1, 'sigma': 0.1}
-data = utils.generate_data(data_parms)
+data_params = {'N': 200, 'data_type': 1, 'sigma': 0.1}
+data = utils.generate_data(data_params)
 utils.my_plot(data, c='k', s=10)
 
 # Construct a Riemannian metric from the data
@@ -78,7 +82,7 @@ plt.legend()
 
 # Print results:
 print('===== Solvers result =====')
-print('[ BVP solver ] [ Failed: ' + str(failed_bvp) + ' ] [ Length: ' + str(np.round(curve_length_bvp, 2)) +' ]')
-print('[ FP solver ] [ Failed: ' + str(failed_fp) + ' ] [ Length: ' + str(np.round(curve_length_fp, 2)) + ' ]')
-print('[ GRAPH solver ] [ Failed: ' + str(failed_graph) + ' ] [ Length: ' + str(np.round(curve_length_graph, 2)) +' ]')
-print('[ COMB solver ] [ Failed: ' + str(failed_comb) + ' ] [ Length: ' + str(np.round(curve_length_comb, 2)) +' ]')
+print('[BVP solver] [Failed: ' + str(failed_bvp) + '] [Length: ' + str(np.round(curve_length_bvp, 2)) + ']')
+print('[FP solver] [Failed: ' + str(failed_fp) + '] [Length: ' + str(np.round(curve_length_fp, 2)) + ']')
+print('[GRAPH solver] [Failed: ' + str(failed_graph) + '] [Length: ' + str(np.round(curve_length_graph, 2)) + ']')
+print('[COMB solver] [Failed: ' + str(failed_comb) + '] [Length: ' + str(np.round(curve_length_comb, 2)) + ']')

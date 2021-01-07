@@ -5,8 +5,13 @@ from core import geometric_methods
 from core import manifolds
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+
 '''
-In this example we fit a LAND model on a simple data manifold
+In this example we fit a LAND model on a simple data manifold.
+
+    "A Locally Adaptive Normal Distribution",
+        G. Arvanitidis, et. al., NeurIPS 2016
+
 '''
 
 # Generate the data
