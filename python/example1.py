@@ -1,8 +1,7 @@
 import numpy as np
-from core import utils
-from core import manifolds
-from core import geodesics
+from python.core import utils, manifolds, geodesics
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
 
 '''
 In this example we construct a simple manifold and compute the geodesic curve between two points using several solvers.
@@ -32,7 +31,9 @@ plt.axis('image')
 # Initialize the geodesic solvers
 solver_bvp = geodesics.SolverBVP(NMax=1000, tol=1e-1)
 solver_fp = geodesics.SolverFP(D=2, N=10, tol=1e-1)
-solver_graph = geodesics.SolverGraph(manifold, data=data, kNN_num=5, tol=1e-2)
+N_nodes = 30
+solver_graph = geodesics.SolverGraph(manifold, data=KMeans(n_clusters=N_nodes, n_init=30, max_iter=1000).fit(data).cluster_centers_,
+                                     kNN_num=int(np.log(N_nodes)), tol=1e-2)
 solver_comb = geodesics.SolverComb(solver_1=solver_bvp, solver_2=solver_graph)
 
 

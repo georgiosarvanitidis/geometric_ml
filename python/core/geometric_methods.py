@@ -1,7 +1,5 @@
 import numpy as np
-from core import geodesics
-from core import utils
-from core import geometric_methods
+from python.core import geodesics
 import matplotlib.pyplot as plt
 from sklearn.metrics import pairwise_distances
 
@@ -23,7 +21,7 @@ def land_predict(manifold, solver, land, data):
 
     for k in range(K):
         responsibilities[:, k] = land['Weights'][k] \
-                             * geometric_methods.evaluate_pdf_land(Logmaps[k, :, :],
+                             * evaluate_pdf_land(Logmaps[k, :, :],
                                                                    land['Sigmas'][k, :, :],
                                                                    land['Consts'][k]).flatten()
 
@@ -122,7 +120,7 @@ def update_mean(manifold, solver, data, land, k, param):
 
         # Compute the constant for the new mean
         Const, V_samples, volM_samples, Z_eucl, _ = \
-            geometric_methods.estimate_norm_constant(manifold, mu_new, Sigma, param['S'])
+            estimate_norm_constant(manifold, mu_new, Sigma, param['S'])
 
         cond = np.sum((mu - mu_new) ** 2)  # The condition to stop
         mu = mu_new.copy()
@@ -165,7 +163,7 @@ def update_Sigma(manifold, solver, data, land, k, param):
 
         # Compute the new normalization constant
         Const, V_samples, volM_samples, Z_eucl, _ = \
-            geometric_methods.estimate_norm_constant(manifold, mu, Sigma_new, param['S'])
+            estimate_norm_constant(manifold, mu, Sigma_new, param['S'])
 
         # The stopping condition
         # cond = np.sum((A - A_new) ** 2)
@@ -184,7 +182,7 @@ def compute_negLogLikelihood(land):
     K = land['means'].shape[0]
     result = np.zeros((land['Logmaps'].shape[1], 1))
     for k in range(K):
-        result += land['Weights'][k] * geometric_methods.evaluate_pdf_land(land['Logmaps'][k, :, :],
+        result += land['Weights'][k] * evaluate_pdf_land(land['Logmaps'][k, :, :],
                                                                            land['Sigmas'][k, :, :],
                                                                            land['Consts'][k])
     return -np.sum(np.log(result))
@@ -240,9 +238,9 @@ def land_mixture_model(manifold, solver, data, param):
         inds_k = (land['Resp'].argmax(axis=1) == k)  # The closest points to the k-th center
         land['Sigmas'][k, :, :] = np.cov(land['Logmaps'][k, inds_k, :].T) * (1 - param['mixing_param']) + np.eye(D) * param['mixing_param']
         land['Consts'][k], land['V_samples'][k, :, :], land['volM_samples'][:, k], land['Z_eucl'][k], _ \
-            = geometric_methods.estimate_norm_constant(manifold, land['means'][k, :].reshape(-1, 1), land['Sigmas'][k, :, :], param['S'])
+            = estimate_norm_constant(manifold, land['means'][k, :].reshape(-1, 1), land['Sigmas'][k, :, :], param['S'])
 
-    negLogLikelihood = geometric_methods.compute_negLogLikelihood(land)
+    negLogLikelihood = compute_negLogLikelihood(land)
     negLogLikelihoods = [negLogLikelihood]
 
     for iteration in range(param['max_iter']):
@@ -251,7 +249,7 @@ def land_mixture_model(manifold, solver, data, param):
         # ----- E-step ----- #
         for k in range(K):
             land['Resp'][:, k] = land['Weights'][k] \
-                                 * geometric_methods.evaluate_pdf_land(land['Logmaps'][k, :, :],
+                                 * evaluate_pdf_land(land['Logmaps'][k, :, :],
                                                                        land['Sigmas'][k, :, :],
                                                                        land['Consts'][k]).flatten()
         land['Resp'] = land['Resp'] / land['Resp'].sum(axis=1, keepdims=True)
@@ -260,20 +258,20 @@ def land_mixture_model(manifold, solver, data, param):
         # Update the means
         for k in range(K):
             land['means'][k, :], land['Logmaps'][k, :, :], land['Consts'][k], land['V_samples'][k, :, :], land['volM_samples'][:, k], land['Z_eucl'][k] = \
-                geometric_methods.update_mean(manifold, solver, data, land, k, param)
+                update_mean(manifold, solver, data, land, k, param)
         # Update the covariances
         for k in range(K):
             land['Sigmas'][k, :, :], land['Consts'][k], land['V_samples'][k, :, :], land['volM_samples'][:, k], land['Z_eucl'][k] = \
-                geometric_methods.update_Sigma(manifold, solver, data, land, k, param)
+                update_Sigma(manifold, solver, data, land, k, param)
         # Update the constants
         for k in range(K):
             land['Consts'][k], land['V_samples'][k, :, :], land['volM_samples'][:, k], land['Z_eucl'][k], _ \
-                = geometric_methods.estimate_norm_constant(manifold, land['means'][k, :].reshape(-1, 1), land['Sigmas'][k, :, :], param['S'])
+                = estimate_norm_constant(manifold, land['means'][k, :].reshape(-1, 1), land['Sigmas'][k, :, :], param['S'])
         # Update the mixing components
         land['Weights'] = np.sum(land['Resp'], axis=0).reshape(-1, 1) / N
 
         # Compute the new likelihood and store it
-        newNegLogLikelihood = geometric_methods.compute_negLogLikelihood(land)
+        newNegLogLikelihood = compute_negLogLikelihood(land)
         negLogLikelihoods = np.concatenate((negLogLikelihoods, [newNegLogLikelihood]), axis=0)
 
         # Check the difference in log-likelihood between updates
